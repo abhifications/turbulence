@@ -1,0 +1,249 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper]{geometry}
+\geometry{top=2.0cm, bottom=2.5cm, left=2.0cm, right=2.0cm}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}       % For bold math symbols
+\usepackage{hyperref} % Optional, for clickable refs
+
+\title{\textbf{Turbulence Working Document}}
+\author{Abhinav Datla}
+\date{\today}
+
+% Custom commands for convenience
+\newcommand\Rey{\mathit{Re}}
+\newcommand\ub{\mathbf{u}}   % Bold velocity
+\newcommand\pb{p}           % Pressure can remain scalar (though gradient is vector)
+\newcommand\x{\mathbf{x}}    % Bold spatial coordinate
+\newcommand\kvec{\mathbf{k}} % Bold wavenumber vector
+
+\begin{document}
+\maketitle
+
+\section{Introduction and Overview}
+
+This document provides a foundational summary of turbulence fundamentals, starting with the Navier--Stokes equations (NSE) in both real (physical) space and wavenumber (\(\kvec\))-space, then moving on to the energy-balance equations that underpin Kolmogorov’s results (including the famous \(-5/3\) inertial-range spectrum).  A primary focus is on developing the correlation-function and structure-function formalisms (the Lin equation in \(\kvec\)-space and the Kármán–Howarth equation in real space) \cite{McComb14a}. 
+
+\subsection{Homogeneity and Isotropy}
+
+Throughout, we emphasize \emph{homogeneous}, \emph{isotropic} turbulence (HIT).  
+- \textbf{Homogeneity} means the statistical properties of the flow do not depend on the position \(\x\).  
+- \textbf{Isotropy} means no preferred direction in space: e.g., correlation tensors depend only on the distance \(r = \|\mathbf{r}\|\), not on its orientation.
+
+These symmetries simplify the correlation and spectral forms of the equations:
+\begin{itemize}
+\item The \emph{mean} velocity in homogeneous, isotropic turbulence is typically taken to be zero, \(\langle \ub \rangle = \mathbf{0}\).  
+\item In wave\-number space, the energy spectrum \(E(k,t)\) depends only on the \emph{magnitude} \(k = \|\kvec\|\), not on the direction of \(\kvec\).
+\end{itemize}
+
+\section{Navier--Stokes Equations in Real Space}
+We begin with the standard \emph{incompressible} Navier--Stokes equations in real space, written in tensor form.  Let \(\ub(\x,t)\) be the velocity field (with components \(u_\alpha\)), \(\pb(\x,t)\) the scalar pressure, \(\rho\) the constant density, and \(\nu_0\) the kinematic viscosity.  Then we have:
+
+\begin{equation}
+  \frac{\partial u_{\alpha}}{\partial t} 
+  \;+\; u_{\beta}\,\frac{\partial u_{\alpha}}{\partial x_{\beta}}
+  \;=\;
+  -\,\frac{1}{\rho}\,\frac{\partial p}{\partial x_{\alpha}}
+  \;+\;\nu_{0}\,\nabla^{2}u_{\alpha},
+\label{eq:NSE_real}
+\end{equation}
+subject to the incompressibility condition
+\begin{equation}
+  \frac{\partial u_{\alpha}}{\partial x_{\alpha}} \;=\; 0.
+\label{eq:continuity}
+\end{equation}
+
+\paragraph{Remark: Convective Derivative.}
+In Equation \eqref{eq:NSE_real}, the nonlinear term \(u_{\beta}\,\partial u_{\alpha}/\partial x_{\beta}\) is often called the \emph{convective derivative} (or “advection” term).  It represents how a fluid particle carrying velocity \(\ub\) moves through velocity gradients in space.
+
+\paragraph{Two Equations, Two Unknowns.}
+Equations \eqref{eq:NSE_real} and \eqref{eq:continuity} form a coupled system for two dependent variables: \(\ub(\x,t)\) (a vector) and \(p(\x,t)\) (a scalar).  From a mathematical viewpoint, we can eliminate \(\pb\) by taking the \emph{divergence} of the momentum equation or, equivalently, applying a \emph{projection operator} in Fourier space (as discussed next).
+
+\section{Elimination of Pressure: Navier--Stokes in Wavenumber Space}
+
+Applying a spatial Fourier transform to \(\ub(\x,t)\) and \(\pb(\x,t)\), we define
+\begin{equation}
+      \ub(\kvec,t)
+  \;=\;
+  \int e^{-\,i\,\kvec\cdot\x}\,\ub(\x,t)\,d^3x,
+  \quad
+  \pb(\kvec,t)
+  \;=\;
+  \int e^{-\,i\,\kvec\cdot\x}\,p(\x,t)\,d^3x.
+\end{equation}
+
+
+The incompressibility condition \eqref{eq:continuity} becomes
+\begin{equation}
+  \kvec \cdot \ub(\kvec,t)\;=\;0,
+\label{eq:incompress_kspace}
+\end{equation}
+which states that \(\ub\) is \emph{transverse} (no component along \(\kvec\)).
+
+\subsection{Projection Operator and the \boldmath$M$ Operator}
+When we transform the momentum equation \eqref{eq:NSE_real}, the pressure gradient in real space becomes \(-i\,\kvec\,\pb(\kvec,t)/\rho\).  However, since \(\ub\) must remain transverse, we can \emph{project out} any longitudinal component of the velocity using:
+\begin{equation}
+P_{\alpha\beta}(\kvec)
+\;=\;
+\delta_{\alpha\beta}
+\;-\;
+\frac{k_\alpha\,k_\beta}{k^2},
+\end{equation}
+where \(k = \|\kvec\|\).  This projection enforces \(\kvec\cdot\ub(\kvec,t)=0\) and in effect \emph{eliminates the pressure term}, yielding a velocity-only equation in wave\-number space:
+\begin{equation}
+  \frac{\partial u_\alpha(\kvec,t)}{\partial t}
+  \;+\;\nu_0\,k^2\,u_\alpha(\kvec,t)
+  \;=\;
+  M_{\alpha\beta\gamma}(\kvec)
+  \,\int \ub_\beta(\mathbf{j},t)\,\ub_\gamma(\kvec-\mathbf{j},t)\,d^3j.
+\label{eq:NSE_kspace}
+\end{equation}
+The tensor \(M_{\alpha\beta\gamma}\) (sometimes constructed from a more fundamental \(N_{\alpha\beta\gamma}\)) encapsulates both the nonlinear triadic interaction of modes and the incompressibility constraint.  Typically,
+\begin{equation}
+M_{\alpha\beta\gamma}(\kvec)
+\;=\;
+\frac{i}{2}\,\bigl[P_{\alpha\beta}(\kvec)\,k_\gamma
+\;+\;P_{\alpha\gamma}(\kvec)\,k_\beta \bigr],
+\end{equation}
+or a closely related form.  Equations \eqref{eq:NSE_real}--\eqref{eq:continuity} are thus recast in a single velocity-only equation with a convolution integral.
+
+\begin{itemize}
+\item \(\nu_0\,k^2\,\ub(\kvec,t)\) is the viscous dissipation in \(k\)-space.
+\item The convolution \(\int \ub(\mathbf{j})\,\ub(\kvec-\mathbf{j})\,d^3j\) captures \emph{triad interactions} (nonlinear coupling among wavenumbers).
+\item The constraint \eqref{eq:incompress_kspace} ensures no compressive (longitudinal) modes exist.
+\end{itemize}
+
+\section{Correlation Functions and Structure Functions}
+
+Because turbulence studies typically focus on energy distributions, we introduce:
+\begin{itemize}
+\item **Two-point correlations** in physical space, such as 
+  \(\langle u_\alpha(\x)\,u_\alpha(\x+\mathbf{r})\rangle\).
+\item **Structure functions**, e.g.\ 
+  \(\langle [u_{\parallel}(\x+\mathbf{r}) - u_{\parallel}(\x)]^n \rangle\).
+\item **Spectra**, i.e.\ how kinetic energy is partitioned among wavenumbers.
+\end{itemize}
+
+\subsection{Energy Spectrum and Correlation in \boldmath$k$-Space}
+
+Define the two-point velocity correlation in \(k\)-space by
+\begin{equation}
+\langle u_\alpha(\kvec,t)\,u_\alpha(\kvec',t)\rangle
+\;\equiv\; \delta(\kvec+\kvec')\,F(k,t),
+\end{equation}
+assuming homogeneity and isotropy so that the correlation depends only on the magnitude \(k\).  The \textbf{energy spectrum} \(E(k,t)\) is related to \(F(k,t)\) via an angular integration (and factors of \(4\pi k^2\), etc.).  Typically one writes:
+\begin{equation}
+E(k,t)
+\;=\;
+4\pi\,k^2\,\frac{1}{2}\,F(k,t)
+\quad
+\text{(or a similar convention).}
+\end{equation}
+Either way, \(E(k,t)\,dk\) represents the contribution to total kinetic energy from wave\-numbers in \([k,k+dk]\).
+
+\section{The Lin Equation for Spectral Energy Balance}
+
+\subsection{Integral Form in Terms of \boldmath$S(k,j)$}
+A widely used expression for the energy balance in wave\-number space is the \textbf{Lin equation}, which can be viewed as the \(\kvec\)-space counterpart of taking the dot product of \(\ub\) with the Navier--Stokes equation.  One may write
+\begin{equation}
+  \frac{\partial E(k,t)}{\partial t}
+  \;=\;
+  \int S\bigl(k,j;t\bigr)\,d j
+  \;-\;2\,\nu_0\,k^2\,E(k,t).
+\label{eq:LinEq_general}
+\end{equation}
+
+Here, \(S(k,j;t)\) is a kernel describing how energy is transferred from wavenumber \(j\) to \(k\) (or vice versa) by nonlinear triad interactions.  Integrating over all \(j\) gives the net energy transfer into wavenumber \(k\).  The final term is the viscous dissipation \(D(k,t) = 2\,\nu_0\,k^2\,E(k,t)\).
+
+\paragraph{Alternative Notation with \boldmath$T(k,t)$.}
+Often one writes 
+\begin{equation}
+T(k,t)
+\;=\;
+\int S(k,j;t)\,d j,
+\end{equation}
+leading to the well-known Lin equation form:
+\begin{equation}
+  \frac{\partial E(k,t)}{\partial t}
+  \;=\;
+  T(k,t)
+  \;-\;
+  2\,\nu_0\,k^2\,E(k,t).
+\label{eq:LinEq_simple}
+\end{equation}
+Because the nonlinear transfer redistributes energy across wave\-numbers \emph{without} creating or destroying it, we have
+\begin{equation}
+\int_{0}^{\infty} T(k,t)\,dk \;=\;0,
+\end{equation}
+
+implying the total energy only changes due to viscous effects (or possible external forcing at low \(k\)).
+
+\subsection{Flux and Cumulative Flux'' in \boldmath$k$-Space}
+
+Define the \textbf{cumulative flux} across wavenumber \(\kappa\) by
+\begin{equation}
+\Pi(\kappa,t)
+\;=\;
+\int_{\kappa}^{\infty} T(k,t)\,dk.
+\end{equation}
+Physically, \(\Pi(\kappa,t)\) represents the net flow of energy \emph{from all wavenumbers \(< \kappa\) to those \(> \kappa\)}.  In high-Reynolds-number flows with a well-developed \emph{inertial range}, \(\Pi(\kappa)\approx \varepsilon\) (the total dissipation rate) for \(\kappa\) within that range, demonstrating a constant cascade of energy from large to small scales.
+
+\section{Kármán–Howarth Equation in Real Space}
+
+The real-space counterpart of the Lin equation is the \textbf{Kármán–Howarth equation} (KHE).  It governs the evolution of the two-point velocity correlation in an isotropic, homogeneous flow.  For the longitudinal structure function 
+\begin{equation}
+S_{n}(r)
+\;=\;
+\left\langle
+\bigl[u_{\parallel}(\x+\mathbf{r}) - u_{\parallel}(\x)\bigr]^n
+\right\rangle,
+\end{equation}
+the KHE describes how \(S_{2}\) and \(S_{3}\) terms evolve in time under inertial and viscous effects.
+
+A commonly cited form (for the second-order correlation) is:
+\begin{equation}
+\frac{\partial}{\partial t}\Bigl[\langle u_\alpha(\x)\,u_\alpha(\x+\mathbf{r})\rangle\Bigr]
+\;=\;
+\text{(nonlinear inertial transfer term)}
+\;+\;
+\text{(viscous term)},
+\label{eq:KHE_general}
+\end{equation}
+with explicit constants depending on isotropy.  Under stationarity and neglecting viscosity at intermediate \(r\), it reduces to Kolmogorov’s \(\tfrac{4}{5}\)-law for the third-order structure function:
+\begin{equation}
+S_{3}(r)
+\;=\;
+-\,\frac{4}{5}\,\varepsilon\,r.
+\end{equation}
+Thus, the KHE and the Lin equation are simply two \emph{equivalent} ways to track scale-by-scale energy transfer: one in real space, the other in wave\-number space.
+
+\section{Classical Kolmogorov Results and the \boldmath$-5/3$ Spectrum}
+
+\subsection{Dimensional Argument for the Inertial Range}
+
+At sufficiently large Reynolds number, one often observes an \emph{inertial range}: a band of wave\-numbers where the only significant parameter is the (constant) energy-transfer rate \(\varepsilon\).  By dimensional analysis, the energy spectrum in that range must scale as
+\begin{equation}
+E(k)
+\;\sim\;
+\varepsilon^{\,2/3}\,
+k^{-5/3}.
+\label{eq:KolmogorovSpectrum}
+\end{equation}
+Equivalently, in real space, the second-order structure function in the inertial range behaves like 
+\begin{equation}
+\langle [u(\x + \mathbf{r}) - u(\x)]^{2}\rangle
+\;\sim\;
+\varepsilon^{2/3}\,r^{2/3}.
+\end{equation}
+This forms the cornerstone of Kolmogorov’s (1941) similarity theory.  Although small “intermittency corrections” can modify these exponents slightly at very high order or very high Reynolds number, \(-5/3\) remains an essential first approximation.
+
+\subsection{Skewness and Higher-Order Statistics}
+
+To probe more subtle properties, one examines higher-order structure functions or velocity-derivative skewness.  These statistics reveal asymmetry and intermittency in the small-scale motions.  While they do not alter the basic \(-5/3\) argument at second order, they can lead to refinements of the simple scaling laws.
+
+\bibliography{wdm}
+\bibliographystyle{abbrv}
+
+
+\end{document}
+
